@@ -5,8 +5,8 @@ import re
 import sys
 import unicodecsv
 import textmining
-
-from nltk import download, word_tokenize
+import nltk
+# from nltk import download, word_tokenize
 
 
 def tokenize(document):
@@ -22,11 +22,21 @@ def tokenize(document):
 if len(sys.argv) != 3:
     print('Usage: python preprocessing.py <inputfile> <outputfile>')
 
-download('punkt')
+def remove_stopwords(tokens):
+    stopwords = nltk.corpus.stopwords.words('finnish')
+    tokens = [t for t in tokens if t not in stopwords]
 
+    return tokens
+
+# Workaround to print tokens nicely
+def print_utf8_list(s):
+    encodedlist=', '.join(map(unicode, s))
+    print(u'[{}]'.format(encodedlist).encode('UTF-8'))
+
+
+### Main starts ###
 
 input_file = sys.argv[1]
-
 output_file = sys.argv[2]
 # Text data
 desc = {}
@@ -51,8 +61,15 @@ with open(input_file) as f:
 
         if text != '':
             desc[idx] = text
-            desc_tokens[idx] = word_tokenize(text, language='finnish')
-            tdm.add_doc(text)
+            # tokens = word_tokenize(text, language='finnish')
+            tokens = tokenize(text)
+            real_tokens = remove_stopwords(tokens)
+            desc_tokens[idx] = tokens
+            tdm.add_doc(" ".join(real_tokens))
+
+            # print_utf8_list(tokens)
+            # print_utf8_list(real_tokens)
+            # print('---')
 
 
 # Write term document matrix to output file
@@ -62,25 +79,3 @@ with open(output_file, 'w') as f:
     for row in tdm.rows(cutoff=1):
         w.writerow(row)
 
-
-# Removing non-alphabetic tokens
-for i in desc_tokens.keys():
-    tokens = desc_tokens[i]
-
-
-# TODO: check/print tokens with non-alpthabetic chars
-
-
-# # TEST!!!!!
-# a = {0:"kissa", 1:"koira", 2:".", 3:"kala", 4:"-"}
-# for i in a:
-#     print(a[i])
-
-#     m = re.search(r"\W+", a[i])
-
-# ----------------------------
-
-for i in desc.keys():
-    print(desc[i])
-    print(desc_tokens[i])
-    print("---")
