@@ -19,9 +19,6 @@ def tokenize(document):
     return document.strip().split()
 
 
-if len(sys.argv) != 3:
-    print('Usage: python preprocessing.py <inputfile> <outputfile>')
-
 def remove_stopwords(tokens):
     stopwords = nltk.corpus.stopwords.words('finnish')
     tokens = [t for t in tokens if t not in stopwords]
@@ -35,6 +32,10 @@ def print_utf8_list(s):
 
 
 ### Main starts ###
+
+if len(sys.argv) != 3:
+    print('Usage: python preprocessing.py <inputfile> <outputfile>')
+
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
