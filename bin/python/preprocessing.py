@@ -73,6 +73,11 @@ with open(input_file) as f:
             # print('---')
 
 
+# TODO: perform lemmatization
+
+
+
+
 # Write term document matrix to output file
 with open(output_file, 'w') as f:
     w = unicodecsv.writer(f, encoding='utf-8')
