@@ -121,8 +121,13 @@ print(time.strftime("%H:%M:%S")  + ' Reading lemmas finished')
 ### ADDING THE LEMMAS TO THE CSV FILE ###
 
 # Adding headers to the lemmatized columns
-data[0][15] = 'perusmuotoistettu muuttoteksti'
-data[0][16] = 'perusmuotoistettu työttömyyden kuvaus'
+for i in idxs:
+    lemmacolidx = rowlen - lemmacolamount + idxs.index(i)
+    data[0][lemmacolidx] = 'perusmuotoistettu sarake ' + str(i+1)
+
+# Adding headers to the lemmatized columns
+# data[0][15] = 'perusmuotoistettu muuttoteksti'
+# data[0][16] = 'perusmuotoistettu työttömyyden kuvaus'
 
 # Saving the original data with extra columns for lemmas
 f = open(config.get('data', 'lemmatized'), 'w+')
