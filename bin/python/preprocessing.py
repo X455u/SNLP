@@ -6,6 +6,7 @@ import sys
 import unicodecsv
 import textmining
 import nltk
+import ConfigParser
 # from nltk import download, word_tokenize
 
 
@@ -33,12 +34,18 @@ def print_utf8_list(s):
 
 ### Main starts ###
 
-if len(sys.argv) != 3:
-    print('Usage: python preprocessing.py <inputfile> <outputfile>')
+if len(sys.argv) != 2:
+    print('Usage: python preprocessing.py <propertyfile>')
+
+# Opening the configuration file
+conf_file = sys.argv[1]
+config = ConfigParser.ConfigParser()
+config.read(conf_file)
+
+data_file = config.get('data', 'lemmatized')
+tdm_file = config.get('data', 'termdocumentmatrix')
 
 
-input_file = sys.argv[1]
-output_file = sys.argv[2]
 # Text data
 desc = {}
 # Tokens of the text data
@@ -48,7 +55,7 @@ tdm = textmining.TermDocumentMatrix(tokenizer=tokenize)
 
 
 # Open the data file for reading
-with open(input_file) as f:
+with open(data_file) as f:
     csv_f = unicodecsv.reader(f, encoding='utf-8')
 
     # Read the file and tokenize
@@ -79,7 +86,7 @@ with open(input_file) as f:
 
 
 # Write term document matrix to output file
-with open(output_file, 'w') as f:
+with open(tdm_file, 'w') as f:
     w = unicodecsv.writer(f, encoding='utf-8')
     # cutoff = 1, also include words that only appear in a single document
     for row in tdm.rows(cutoff=1):
