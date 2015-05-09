@@ -10,8 +10,8 @@ trainp = 0.2;
 cols = size(D,1);
 
 % Counting column lengths
-devam = devp * cols;
-trainam = trainp * cols;
+devam = round(devp * cols);
+trainam = round(trainp * cols);
 testam = cols - (devam + trainam);
 
 % Splitting the data
