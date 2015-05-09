@@ -8,8 +8,6 @@ import textmining
 import nltk
 import ConfigParser
 import json
-# from nltk import download, word_tokenize
-
 
 def tokenize(document):
     """
@@ -20,32 +18,54 @@ def tokenize(document):
     document = re.sub(u'[^\w]|[0-9]', u' ', document, flags=re.UNICODE)
     return document.strip().split()
 
-
-def remove_stopwords(tokens):
-    stopwords = nltk.corpus.stopwords.words('finnish')
+def remove_stopwords(s, stopwords):
+    # Splitting the text into words and joining them again
+    tokens = s.split(" ")
     tokens = [t for t in tokens if t not in stopwords]
+    return " ".join(tokens)
 
-    return tokens
-
-# Workaround to print tokens nicely
+# Used for testing
 def print_utf8_list(s):
     encodedlist=', '.join(map(unicode, s))
     print(u'[{}]'.format(encodedlist).encode('UTF-8'))
 
-
-### Main starts ###
+###################
+### MAIN STARTS ###
+###################
 
 if len(sys.argv) != 2:
     print('Usage: python preprocessing.py <propertyfile>')
+
+
+### CONFIG AND OTHER FILES ###
 
 # Opening the configuration file
 conf_file = sys.argv[1]
 config = ConfigParser.ConfigParser()
 config.read(conf_file)
 
+# stopwords from NLTK
+stopwords = []
+
+# Stopwords from a files
+if config.getboolean('parameters', 'lemmatize'):
+    stopwords.append(nltk.corpus.stopwords.words('finnish'))
+
+    with open(config.get('stopwords', 'stopwordfile')) as f:
+        csv_f = unicodecsv.reader(f, encoding='utf-8')
+
+        # Read the file containing stopwords
+        for idx, row in enumerate(csv_f):
+            # one stopword per line
+            if not row[0] in stopwords:
+                stopwords.append(row[0])
+
+
 # input and output files
 data_file = config.get('data', 'lemmatized')
 tdm_file = config.get('data', 'termdocumentmatrix')
+
+### INITIALIZING DATA STRUCTURES AND WRITERS ###
 
 # amount of text fields in the document
 textcolumns = json.loads(config.get('data', 'textdataidx'))
@@ -55,13 +75,6 @@ tdms = []
 
 for i in range(len(textcolumns)):
     tdms.append(textmining.TermDocumentMatrix(tokenizer=tokenize))
-    # tdms.append(textmining.TermDocumentMatrix())
-
-
-# Text data
-desc = {}
-# Tokens of the text data
-desc_tokens = {}
 
 
 # creating writers for storing the classes
@@ -74,14 +87,14 @@ class_end = m.group(2)
 
 writers = []
 
-# Write term document matrices to output files
+# Open writers for storing document classifications
 for i in range(len(textcolumns)):
     path = class_beg + str(i+1) + class_end
 
     f = open(path, 'w+')
     writers.append(unicodecsv.writer(f, encoding='utf-8'))
 
-
+### READING THE DATA FILE ###s
 
 # Open the data file for reading
 with open(data_file) as f:
@@ -109,9 +122,17 @@ with open(data_file) as f:
 
             # TODO: separate the classes for the arrays
             if text != '':
-                desc[idx] = text
+
+                # there are still some capital letters after lemmatization
+                text = text.lower()
+
+                # Removing stopwords
+                text = remove_stopwords(text, stopwords)
+
+                # Add to term-document matrix
                 tdms[i].add_doc(text)
 
+                # Write classes
                 classes = []
 
                 for c in classcolumns:
@@ -119,19 +140,8 @@ with open(data_file) as f:
 
                 writers[i].writerow(classes)
 
-                # print(text.encode('utf-8'))
 
-                # tokens = word_tokenize(text, language='finnish')
-                
-                # tokens = tokenize(text)
-                # real_tokens = remove_stopwords(tokens)
-                # desc_tokens[idx] = tokens
-                # tdms[i].add_doc(" ".join(real_tokens))
-
-                # print_utf8_list(tokens)
-                # print_utf8_list(real_tokens)
-                # print('---')
-
+### SAVING THE TERM-DOCUMENT MATRICES ###
 
 # Splitting the tdm file path for creating tmd files for all the text columns
 m = re.match( r'(.*)(\..*)', tdm_file)
