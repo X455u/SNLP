@@ -64,6 +64,25 @@ desc = {}
 desc_tokens = {}
 
 
+# creating writers for storing the classes
+class_file = config.get('data', 'classes')
+classcolumns = json.loads(config.get('data', 'classidx'))
+
+m = re.match( r'(.*)(\..*)', class_file)
+class_beg =  m.group(1)
+class_end = m.group(2)
+
+writers = []
+
+# Write term document matrices to output files
+for i in range(len(textcolumns)):
+    path = class_beg + str(i+1) + class_end
+
+    f = open(path, 'w+')
+    writers.append(unicodecsv.writer(f, encoding='utf-8'))
+
+
+
 # Open the data file for reading
 with open(data_file) as f:
     csv_f = unicodecsv.reader(f, encoding='utf-8')
@@ -72,14 +91,34 @@ with open(data_file) as f:
     for idx, row in enumerate(csv_f):
 
         if idx == 0:
+
+            # Copying the class headers
+            for w in writers:
+                headers = []
+
+                for i in range(len(classcolumns)):
+                    headers.append(row[classcolumns[i]])
+
+                w.writerow(headers)
+
             continue
 
         # assuming that the last columns of the data file contain the lemmatized texts
         for i in range(len(textcolumns)):
             text = row[len(row)-len(textcolumns)+i]
+
+            # TODO: separate the classes for the arrays
             if text != '':
                 desc[idx] = text
                 tdms[i].add_doc(text)
+
+                classes = []
+
+                for c in classcolumns:
+                    classes.append(row[c])
+
+                writers[i].writerow(classes)
+
                 # print(text.encode('utf-8'))
 
                 # tokens = word_tokenize(text, language='finnish')
