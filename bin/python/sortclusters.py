@@ -10,33 +10,23 @@ import re
 
 ### FUNCTIONS FOR COUNTING CLUSTER STATISTICS ### 
 
-def avgtextlen(texts):
-    count = 0
-    for t in texts:
-        count += len(t.split())
-
-    return count / float(len(texts))
-
-def maxtextlen(texts):
+def text_statistics(texts):
+    lencount = 0
+    minlen = sys.maxint
     maxlen = 0
 
     for t in texts:
         l = len(t.split())
+        lencount += l
+
         if l > maxlen:
             maxlen = l
 
-    return maxlen
-
-
-def mintextlen(texts):
-    minlen = sys.maxint
-
-    for t in texts:
-        l = len(t.split())
         if l < minlen:
             minlen = l
 
-    return minlen
+    return (lencount / float(len(texts)), maxlen, minlen)
+        
 
 ###################
 ### MAIN STARTS ###
@@ -139,7 +129,8 @@ with open(config.get('clusters', 'clustertexts'),"w") as f:
 
             # Writing cluster info
             f.write("Cluster: " + str(i+1) + "  Texts: " + str(len(c)) + "\n")
-            f.write("Avg len: " +  str(avgtextlen(c)) + "  Min len: " + str(mintextlen(c)) + "  Max len: " + str(maxtextlen(c)) + "\n" )
+            stats = text_statistics(c)
+            f.write("Avg len: " +  str(stats[0]) + "  Min len: " + str(stats[2]) + "  Max len: " + str(stats[1]) + "\n" )
 
             for j in range(len(termclusters[i])):
 
