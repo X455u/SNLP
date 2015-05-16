@@ -27,6 +27,17 @@ def text_statistics(texts):
 
     return (lencount / float(len(texts)), maxlen, minlen)
         
+def sort_counts(counts, headers):
+    c = []
+
+    for i in range(len(counts)):
+        c.append((counts[i], headers[i]))
+
+    c.sort(reverse=True)
+
+    return c
+
+
 
 ###################
 ### MAIN STARTS ###
@@ -132,11 +143,16 @@ with open(config.get('clusters', 'clustertexts'),"w") as f:
             stats = text_statistics(c)
             f.write("Avg len: " +  str(stats[0]) + "  Min len: " + str(stats[2]) + "  Max len: " + str(stats[1]) + "\n" )
 
-            for j in range(len(termclusters[i])):
 
-                # Do not print terms with low counts
-                if termclusters[i][j] > 2:
-                    f.write(str(termclusters[i][j]) + " : " + termheader[j].encode('utf-8')+ "\n")
+            # Sort the term counts by amount
+
+            sortedcounts = sort_counts(termclusters[i], termheader)
+
+            for am, t in sortedcounts:
+                # Do not print with low counts
+                if am > 2:
+                    f.write(str(am) + " : " + t.encode('utf-8') + "\n")
+
 
             # Writing the text descriptions
             for s in c:
