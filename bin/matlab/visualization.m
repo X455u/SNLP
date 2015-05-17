@@ -40,7 +40,7 @@ for j = 1:size(TDMS, 2),
     [occur, indices] = sort(sum(data), 'descend');
     fprintf(jsonfile,'[\n');
     for i = 1:jsonlen,
-       str = sprintf('["%s", %d]', A.textdata{indices(i)}, occur(i));
+       str = sprintf('["%s", %d]', TDMS{j}.textdata{indices(i)}, occur(i));
        if i ~= jsonlen,
            fprintf(jsonfile, '%s,\n', str);
        else

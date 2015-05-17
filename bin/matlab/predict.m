@@ -1,15 +1,24 @@
 for j = 1:size(TDMS, 2),
     data = TDMS{j}.data;
+    
+    % make data binary
+%     data = sign(data);
+    % perform tf-idf
+    data = tfidf2(data);
+    
     classes = CLASSES{j}.data;
     % binary classes
     % {1, 2} -> 0
     % {2, 3} -> 1
     binclasses = round((classes -1) /3);
     
+    
     [ devdata, traindata, testdata ] = splitdata(data);
     [ devclasses, trainclasses, testclasses ] = splitdata(binclasses);
+
     
     model = fitcknn(devdata, devclasses(:,1), 'NumNeighbors', 3, 'Distance', 'cosine');
+%     model = fitcknn(devdata, devclasses(:,1), 'NumNeighbors', 3, 'Distance', 'spearman');
     disp('Prior');
     disp(model.Prior);
     
