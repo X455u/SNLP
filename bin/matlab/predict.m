@@ -1,4 +1,4 @@
-dataTypes = {'tf'; 'binary'; 'tfidf'};
+dataTypes = {'tf'; 'binary'; 'tfidf'; 'pca'};
 neighborNums = [1; 3; 5; 7];
 distances = {
     'cityblock'; 'chebychev'; 'correlation'; 'cosine'; 'euclidean';
@@ -23,7 +23,9 @@ for tdmIndex = 1:size(TDMS, 2),
                     if strcmp(dataType, 'binary'),
                         data = sign(data);
                     elseif strcmp(dataType, 'tfidf'),
-                        data = tfidf2(data);
+                        data = tfidf2(data')';
+                    elseif strcmp(dataType, 'pca'),
+                        [data, ~] = pcaDimReduct(data, 10);
                     end
 
                     classes = CLASSES{tdmIndex}.data(:,clsIndex);
@@ -92,3 +94,4 @@ end
 disp('TRAINING DONE');
 disp('Best parameters:');
 disp(bestParameters);
+disp(bestScore);

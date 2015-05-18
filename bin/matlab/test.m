@@ -1,14 +1,14 @@
 % Best will be:
-% tdm: 1, data type: tfidf, classIndex:  1, neighbors: 5, distance: cosine
+% tdm: 1, data type: tfidf, classIndex:  1, neighbors: 5, distance: correlation
 % set parameters and run with test data
 
 disp('TESTING');
 tdmIndex = 1;
 clsIndex = 1;
-neighbors = 7;
-distance = 'cosine';
+neighbors = 5;
+distance = 'correlation';
 
-data = tfidf2(TDMS{tdmIndex}.data);
+data = tfidf2(TDMS{tdmIndex}.data')';
 classes = CLASSES{tdmIndex}.data(:,clsIndex);
 binclasses = round((classes - 1) / 3);
 
@@ -21,7 +21,7 @@ model = fitcknn(...
     'Distance', distance...
 );
 
-[accuracy, cm] = evaluateModel(model, traindata, trainclasses);
+[accuracy, cm] = evaluateModel(model, testdata, testclasses);
 tp = cm(2,2);
 fp = cm(1,2);
 tn = cm(1,1);
